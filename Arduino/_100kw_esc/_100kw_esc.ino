@@ -55,9 +55,13 @@ void loop() {
   HiVoltage =  (5.0 * analogRead(HVPin ) * 4750.0) / 1024;
 
   // map it to the range of the analog out:
+  constrain(MainFB,185,677);  //limit min max ..
+  constrain(SecFB,300,790);
+  
   MainPWM = map(MainFB, 185, 677, 0, 255);
   SecPWM = map(SecFB, 300, 790, 0, 155); //temp limit
 
+ 
   // change the analog out value:
   analogWrite(pwmRot, MainPWM);
   analogWrite(pwmStat, SecPWM);
@@ -81,14 +85,3 @@ void loop() {
   Serial.print(SecPWM);
   Serial.println( );
 
-
-
-
-
-
-
-  // wait 2 milliseconds before the next loop
-  // for the analog-to-digital converter to settle
-  // after the last reading:
-  delay(2);
-}
