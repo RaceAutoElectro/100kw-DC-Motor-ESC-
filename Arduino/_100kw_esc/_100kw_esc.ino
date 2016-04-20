@@ -7,7 +7,9 @@
   pin7 - buton2
   pin8 - precharge ralay
   pin9 - pwm - stator 260 fet amp
+
   ----------------------------------
+
   pinA0 - amperage pin          519
   pinA1 - lm35 temp senzor             //
   pinA2 - fb2                947 - 562
@@ -16,17 +18,29 @@
   pinA5 - SCL                   LCD
   pinA6- volt-HV 100k & 2.2k
   pinA7- volt-lv 10k & 2.2k
+
+
   12.44 - 460
   13.78 - 507
+
+
   11.77-50
   11.56-49
   11.52-48
+
+
 */
+#include <Wire.h> 
+#include <LiquidCrystal_I2C.h>
+
+// Set the LCD address to 0x27 for a 16 chars and 2 line display
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
 // These constants won't change.  They're used to give names
 // to the pins used:
 const int AMPPin  = A0;  // A1302 hall senzor 
-const int FB2Pin  = A2;  // FB2     947 - 562   (Bosch)        // 300 - 790   (Ford)
-const int FB1Pin  = A3;  // FB1     157 - 940                  // 185 - 677
+const int FB2Pin  = A2;  // FB2     947 - 562   (Bosch)
+const int FB1Pin  = A3;  // FB1     157 - 940
 const int HVPin  = A6;  // volt-HV 100k & 2.2k
 const int LVPin  = A7;  // volt-lv 10k & 2.2k
 const int pwmRot = 5;          // MainPWM for Rotor
@@ -43,25 +57,30 @@ int AMP = 0;                //  A1302 hall senzor
 void setup() {
   // initialize serial communications at 9600 bps:
   Serial.begin(9600);
+  {
+  // initialize the LCD
+  lcd.begin();
+
+  // Turn on the blacklight and print a message.
+ lcd.backlight();
+  lcd.print("Hello, world1!");
+}
+
 }
 
 void loop() {
   // read the analog in value:
   tempValue = (5.0 * analogRead(A1) * 100.0) / 1024;
-  AMP = (analogRead(AMPPin )-516)/2;
+  AMP = (analogRead(AMPPin )-518)/2;
   MainFB = analogRead(FB1Pin );
   SecFB =  analogRead(FB2Pin );
   LoVoltage = (5.0 * analogRead(LVPin ) * 560.0) / 1024; ;
   HiVoltage =  (5.0 * analogRead(HVPin ) * 4750.0) / 1024;
 
   // map it to the range of the analog out:
-  constrain(MainFB,185,677);  //limit min max ..
-  constrain(SecFB,300,790);
-  
-  MainPWM = map(MainFB, 185, 677, 0, 255);
-  SecPWM = map(SecFB, 300, 790, 0, 155); //temp limit
+  MainPWM = map(MainFB, 154, 940, 0, 255);
+  SecPWM = map(SecFB, 948, 562, 0, 155); //temp limit
 
- 
   // change the analog out value:
   analogWrite(pwmRot, MainPWM);
   analogWrite(pwmStat, SecPWM);
@@ -85,3 +104,27 @@ void loop() {
   Serial.print(SecPWM);
   Serial.println( );
 
+lcd.clear();
+lcd.setCursor(0, 0);
+lcd.print("LoV=");
+lcd.print(LoVoltage);
+lcd.setCursor(9, 0);
+lcd.print("Tc=");
+lcd.print(tempValue);
+lcd.setCursor(0, 1);
+lcd.print("AMP=");
+lcd.print(AMP);
+lcd.setCursor(9, 1);
+lcd.print("HV=");
+lcd.print(HiVoltage);
+
+
+
+
+
+
+  // wait 2 milliseconds before the next loop
+  // for the analog-to-digital converter to settle
+  // after the last reading:
+  delay(2);
+}
