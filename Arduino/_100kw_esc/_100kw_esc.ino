@@ -39,8 +39,8 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 // These constants won't change.  They're used to give names
 // to the pins used:
 const int AMPPin  = A0;  // A1302 hall senzor 
-const int FB2Pin  = A2;  // FB2     947 - 562   (Bosch)
-const int FB1Pin  = A3;  // FB1     157 - 940
+const int FB2Pin  = A2;  // FB2     947 - 562   (Bosch)        // 300 - 790   (Ford)
+const int FB1Pin  = A3;  // FB1     157 - 940                  // 185 - 677
 const int HVPin  = A6;  // volt-HV 100k & 2.2k
 const int LVPin  = A7;  // volt-lv 10k & 2.2k
 const int pwmRot = 5;          // MainPWM for Rotor
@@ -78,8 +78,11 @@ void loop() {
   HiVoltage =  (5.0 * analogRead(HVPin ) * 4750.0) / 1024;
 
   // map it to the range of the analog out:
-  MainPWM = map(MainFB, 154, 940, 0, 255);
-  SecPWM = map(SecFB, 948, 562, 0, 155); //temp limit
+//  MainPWM = map(MainFB, 154, 940, 0, 255);       // bosch 
+//  SecPWM = map(SecFB, 948, 562, 0, 155); //temp limit
+
+ MainPWM = map(MainFB, 185, 677, 0, 255);      // ford
+  SecPWM = map(SecFB, 300, 790, 0, 155); //temp limit
 
   // change the analog out value:
   analogWrite(pwmRot, MainPWM);
