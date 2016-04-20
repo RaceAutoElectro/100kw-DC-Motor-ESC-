@@ -1,14 +1,14 @@
 /*
   pin0,1 -Serial COM
   pin2 - int-can (and pin10,11,12,13)
-  pin3 - buton1
-  pin5 - pwm - rotor 1300 fet amp
-  pin6 - pwm led
-  pin7 - buton2
-  pin8 - precharge ralay
+  pin3 - RPM 
+  pin5 - MAIN PWM ( InA+InB ) for driver ----  rotor 1300 fet amp
+  pin6 - LOW side Mosfet driver (PWM pin) ( must be HIGH all the time ) !!!!!!!!!!!!
+  pin7 - Diag Driver  pull up rezistor read to see if driver OK ( mosfet not shorted) ..... or put LOW to desable driver 
+  pin8 - Main relay ( HV gnd relay is ON with controller ( ignition on )  and HV+ is feed by a precharge rezistor ( 100 ohm ~ 20w ) and bypased by Main relay )
   pin9 - pwm - stator 260 fet amp
 
-  ----------------------------------
+  ---------------------------------
 
   pinA0 - amperage pin          519
   pinA1 - lm35 temp senzor             //
