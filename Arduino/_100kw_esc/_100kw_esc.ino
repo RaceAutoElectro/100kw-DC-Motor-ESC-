@@ -54,8 +54,10 @@ int SecPWM = 0;             // SecPWM for Stator
 int tempValue = 0;           //  lm35 -temperature senzor
 int AMP = 0;                //  A1302 hall senzor
 
+
 void setup() {
   // initialize serial communications at 9600 bps:
+ pinMode(6, OUTPUT); // LOW side Mosfet driver (PWM pin) ( must be HIGH all the time ) !!!!!!!!!!!!
   Serial.begin(9600);
   {
   // initialize the LCD
@@ -69,6 +71,7 @@ void setup() {
 }
 
 void loop() {
+  digitalWrite(6, HIGH);   // LOW side Mosfet driver (PWM pin) ( must be HIGH all the time ) !!!!!!!!!!!!
   // read the analog in value:
   tempValue = (5.0 * analogRead(A1) * 100.0) / 1024;
   AMP = (analogRead(AMPPin )-518)/2;
