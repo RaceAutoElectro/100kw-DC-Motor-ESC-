@@ -58,7 +58,9 @@ void loop() {
   tempValue = (5.0 * analogRead(A1) * 100.0) / 1024;
   AMP = (analogRead(AMPPin )-518)/2;
   MainFB = analogRead(FB1Pin );
+  constrain(MainFB,154,940);
   SecFB =  analogRead(FB2Pin );
+  constrain(SecFB,948,562);
   LoVoltage = (5.0 * analogRead(LVPin ) * 560.0) / 1024; ;
   HiVoltage =  (5.0 * analogRead(HVPin ) * 4750.0) / 1024;
 
