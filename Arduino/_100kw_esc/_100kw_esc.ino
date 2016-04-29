@@ -32,7 +32,7 @@
 */
 // These constants won't change.  They're used to give names
 // to the pins used:
-const int AMPPin  = A0;  // A1302 hall senzor 
+const int AMPPin  = A0;  // A1302 hall senzor
 const int FB2Pin  = A2;  // FB2     947 - 562   (Bosch)
 const int FB1Pin  = A3;  // FB1     157 - 940
 const int HVPin  = A6;  // volt-HV 100k & 2.2k
@@ -56,11 +56,11 @@ void setup() {
 void loop() {
   // read the analog in value:
   tempValue = (5.0 * analogRead(A1) * 100.0) / 1024;
-  AMP = (analogRead(AMPPin )-518)/2;
+  AMP = (analogRead(AMPPin ) - 518) / 2;
   MainFB = analogRead(FB1Pin );
-  constrain(MainFB,154,940);
+  constrain(MainFB, 154, 940);
   SecFB =  analogRead(FB2Pin );
-  constrain(SecFB,948,562);
+  constrain(SecFB, 948, 562);
   LoVoltage = (5.0 * analogRead(LVPin ) * 560.0) / 1024; ;
   HiVoltage =  (5.0 * analogRead(HVPin ) * 4750.0) / 1024;
 
@@ -73,26 +73,29 @@ void loop() {
   analogWrite(pwmStat, SecPWM);
 
   // print the results to the serial monitor:
+  /*  Serial.print("MainFB = ");
+    Serial.print(MainFB);
+    Serial.print("\t SecFB = ");
+    Serial.print(SecFB);
+    Serial.print("\t HiVoltage = ");
+    Serial.print(HiVoltage);
+    Serial.print("\t LoVoltage = ");
+    Serial.print(LoVoltage);
+     Serial.print("\t AMP = ");
+    Serial.print(AMP);
+    Serial.print("\t temp = ");
+    Serial.print(tempValue);
+    Serial.print("\t MainPwm = ");
+    Serial.print(MainPWM);
+    Serial.print("\t SecPwm = ");
+    Serial.print(SecPWM);
+    Serial.println( );
+
+  */
   Serial.print("MainFB = ");
   Serial.print(MainFB);
   Serial.print("\t SecFB = ");
   Serial.print(SecFB);
-  Serial.print("\t HiVoltage = ");
-  Serial.print(HiVoltage);
-  Serial.print("\t LoVoltage = ");
-  Serial.print(LoVoltage);
-   Serial.print("\t AMP = ");
-  Serial.print(AMP);
-  Serial.print("\t temp = ");
-  Serial.print(tempValue);
-  Serial.print("\t MainPwm = ");
-  Serial.print(MainPWM);
-  Serial.print("\t SecPwm = ");
-  Serial.print(SecPWM);
-  Serial.println( );
-
-
-
 
 
 
