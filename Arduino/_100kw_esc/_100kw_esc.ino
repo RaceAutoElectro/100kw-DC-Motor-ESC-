@@ -1,39 +1,11 @@
-//
-//  pin0,1 -Serial COM
-//  pin2 - int-can (and pin10,11,12,13)
-//  pin3 - buton1
-//  pin7 - buton2
-//  pin8 - precharge ralay
-//  pin9 - pwm - stator 260 fet amp
-//
-//  ----------------------------------
-//  pinA2 - fb2                947 - 562
-//  pinA3 - fb1                157 - 940
-//  pinA4 - SDA                   LCD
-//  pinA5 - SCL                   LCD
-//  pinA6- volt-HV 100k & 2.2k
-//  pinA7- volt-lv 10k & 2.2k
-//
-//
-//  12.44 - 460
-//  13.78 - 507
-//
-//
-//  11.77-50
-//  11.56-49
-//  11.52-48
 #define SERIAL_ENABLED 1
 #define LCD_ENABLED 1
-
-
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
+// Set the LCD address to 0x27 for a 20 chars and 4 line display
+LiquidCrystal_I2C lcd(0x27, 20, 4);
 
-// Set the LCD address to 0x27 for a 16 chars and 2 line display
-LiquidCrystal_I2C lcd(0x27, 16, 2);
-
-// These constants won't change.  They're used to give names
-// to the pins used:
+// These defines won't change.  They're used to give names to the pins used:
 // A1302 hall senzor
 #define CURRENT_PIN A0
 //  pinA1 - lm35 temp senzor             //
@@ -51,12 +23,11 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 int MainFB = 0;               // MainFB ( TPS1 )
 int SecFB = 0;                // SecFB ( TPS2 )
-int LoVoltage = 0;           // Low Voltage 0-22v
 int HiVoltage = 0;            // Hi  Voltage 0-220v
-int MainPWM = 0;             // MainPWM for Rotor
-int SecPWM = 0;             // SecPWM for Stator
-int tempValue = 0;           //  lm35 -temperature senzor
-int AMP = 0;                //  A1302 hall senzor
+int MainPWM = 0;              // MainPWM for Rotor
+int SecPWM = 0;               // SecPWM for Stator
+int tempValue = 0;            //  lm35 -temperature sensor
+int AMP = 0;                  //  A1302 hall senzor
 
 void setup() {
 #if SERIAL
@@ -108,20 +79,15 @@ void loop() {
 #if LCD_ENABLED
   lcd.clear();
   lcd.setCursor(0, 0);
-  lcd.print("LoV=");
-  lcd.print(LoVoltage);
-  lcd.setCursor(9, 0);
-  lcd.print("Tc=");
-  lcd.print(tempValue);
-  lcd.setCursor(0, 1);
-  lcd.print("AMP=");
   lcd.print(AMP);
-  lcd.setCursor(9, 1);
-  lcd.print("HV=");
+  lcd.print(" A");
+  lcd.setCursor(9, 0);
+  lcd.print(tempValue);
+  lcd.print("ºC");
+  lcd.setCursor(0, 1);
   lcd.print(HiVoltage);
+  lcd.print(" V");
 #endif
-
-
   // wait 2 milliseconds before the next loop
   // for the analog-to-digital converter to settle
   // after the last reading:
