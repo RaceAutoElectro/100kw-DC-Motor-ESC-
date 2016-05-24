@@ -53,8 +53,9 @@ void loop() {
   SecFB = constrain(SecFB, 948, 562);
   HiVoltage =  (5.0 * analogRead(HV_PIN ) * 4750.0) / 1024;
   // map it to the range of the analog out:
-  MainPWM = map(MainFB, 154, 940, 0, 255);
-  SecPWM = map(SecFB, 948, 562, 0, 155); //temp limit
+  //mai intai te uiti ce iti vine MAINFB si SECFB ca limite si bagi limitele in map
+  //MainPWM = map(MainFB, 154, 940, 0, 12); //limita laPWM 4.7%
+  //SecPWM = map(SecFB, 948, 562, 0, 12);   //limita laPWM 4.7%
   // change the analog out value:
   analogWrite(ROTOR_PWM_PIN, MainPWM);
   analogWrite(STATOR_PWM_PIN, SecPWM);
