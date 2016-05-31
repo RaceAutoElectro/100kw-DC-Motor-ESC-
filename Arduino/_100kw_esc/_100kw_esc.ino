@@ -1,9 +1,10 @@
-#define SERIAL_ENABLED 1
+#define SERIAL_ENABLED 0
 #define LCD_ENABLED 1
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
-// Set the LCD address to 0x27 for a 20 chars and 4 line display
-LiquidCrystal_I2C lcd(0x27, 20, 4);
+
+// Set the LCD address to 0x27 for a 16 chars and 2 line display
+LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 // These defines won't change.  They're used to give names to the pins used:
 // A1302 hall senzor
@@ -36,7 +37,7 @@ void setup() {
 #endif
 #if LCD
   // initialize the LCD
-  lcd.begin(20, 4, LCD_5x8DOTS);
+  lcd.begin();
   // Turn on the blacklight and print a message.
   lcd.backlight();
   lcd.print("Hello, world1!");
@@ -53,7 +54,7 @@ void loop() {
   SecFB = constrain(SecFB, 948, 562);
   HiVoltage =  (5.0 * analogRead(HV_PIN ) * 4750.0) / 1024;
   // map it to the range of the analog out:
-  //mai intai te uiti ce iti vine MAINFB si SECFB ca limite si bagi limitele in map
+  //mai intai te uiti ca iti vine MAINFB si SECFB ca limite si bagi limitele in map
   //MainPWM = map(MainFB, 154, 940, 0, 12); //limita laPWM 4.7%
   //SecPWM = map(SecFB, 948, 562, 0, 12);   //limita laPWM 4.7%
   // change the analog out value:
