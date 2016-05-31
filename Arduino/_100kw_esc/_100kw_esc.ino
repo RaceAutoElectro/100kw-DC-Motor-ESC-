@@ -7,9 +7,7 @@
   pin7 - Diag Driver  pull up rezistor read to see if driver OK ( mosfet not shorted) ..... or put LOW to desable driver 
   pin8 - Main relay ( HV gnd relay is ON with controller ( ignition on )  and HV+ is feed by a precharge rezistor ( 100 ohm ~ 20w ) and bypased by Main relay )
   pin9 - pwm - stator 260 fet amp
-
   ---------------------------------
-
   pinA0 - amperage pin          519
   pinA1 - lm35 temp senzor             //
   pinA2 - fb2                947 - 562
@@ -18,17 +16,11 @@
   pinA5 - SCL                   LCD
   pinA6- volt-HV 100k & 2.2k
   pinA7- volt-lv 10k & 2.2k
-
-
   12.44 - 460
   13.78 - 507
-
-
   11.77-50
   11.56-49
   11.52-48
-
-
 */
 #include <Wire.h> 
 #include <LiquidCrystal_I2C.h>
