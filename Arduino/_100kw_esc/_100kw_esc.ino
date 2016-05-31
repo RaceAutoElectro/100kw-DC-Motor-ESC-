@@ -48,7 +48,10 @@ void setup() {
 void loop() {
   // read the analog in value:
   tempValue = (5.0 * analogRead(A1) * 100.0) / 1024;
-  AMP = (analogRead(CURRENT_PIN) - 518) / 2;
+  for(char i=0;i<10;i++)
+    AMP += (analogRead(CURRENT_PIN) - 518) / 2;
+  AMP=AMP/10;
+  
   MainFB = analogRead(FB1_PIN );
   MainFB = constrain(MainFB, 154, 940);
   SecFB =  analogRead(FB2_PIN );
