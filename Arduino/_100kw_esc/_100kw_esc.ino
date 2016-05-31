@@ -3,6 +3,9 @@
 #include <Wire.h>
 #if LCD_ENABLED
 #include <LiquidCrystal_I2C.h>
+// Set the LCD address to 0x27 for a 16 chars and 2 line display
+  LiquidCrystal_I2C lcd(0x27, 16, 2, LCD_5x8DOTS);
+  
 #endif
 // These defines won't change.  They're used to give names to the pins used:
 // A1302 hall senzor
@@ -34,8 +37,6 @@ void setup() {
   Serial.begin(9600);
 #endif
 #if LCD_ENABLED
-  // Set the LCD address to 0x27 for a 16 chars and 2 line display
-  LiquidCrystal_I2C lcd(0x27, 16, 2, LCD_5x8DOTS);
   // initialize the LCD
   lcd.begin();
   // Turn on the blacklight and print a message.
