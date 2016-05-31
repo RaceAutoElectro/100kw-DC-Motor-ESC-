@@ -1,11 +1,11 @@
 #define SERIAL_ENABLED 0
 #define LCD_ENABLED 1
 #include <Wire.h>
+#if LCD_ENABLED
 #include <LiquidCrystal_I2C.h>
-
 // Set the LCD address to 0x27 for a 16 chars and 2 line display
-LiquidCrystal_I2C lcd(0x27, 16, 2);
-
+LiquidCrystal_I2C lcd(0x27, 16, 2, LCD_5x8DOTS);
+#endif
 // These defines won't change.  They're used to give names to the pins used:
 // A1302 hall senzor
 #define CURRENT_PIN A0
