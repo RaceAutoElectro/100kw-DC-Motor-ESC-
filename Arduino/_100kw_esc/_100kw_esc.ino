@@ -35,7 +35,7 @@ void setup() {
   // initialize serial communications at 9600 bps:
   Serial.begin(9600);
 #endif
-#if LCD
+#if LCD_ENABLED
   // initialize the LCD
   lcd.begin();
   // Turn on the blacklight and print a message.
