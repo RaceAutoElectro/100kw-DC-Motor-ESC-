@@ -8,29 +8,24 @@ LiquidCrystal_I2C lcd(0x27, 16, 2, LCD_5x8DOTS);
 
 #endif
 // These defines won't change.  They're used to give names to the pins used:
-// A1302 hall senzor
-#define CURRENT_PIN A0
-//  pinA1 - lm35 temp senzor             //
-#define TEMP_PIN A1
-// FB2     947 - 562   (Bosch)
-#define FB2_PIN A2
-// FB1     157 - 940
-#define FB1_PIN A3
-// volt-HV 100k & 2.2k
-#define HV_PIN A6
-// MainPWM for Rotor
-#define ROTOR_PWM_PIN 6
-// SecPWM for Stator
-#define STATOR_PWM_PIN 9
+
+#define CURRENT_PIN A0 // A1302 hall senzor
+#define TEMP_PIN A1 //  pinA1 - lm35 temp senzor   
+#define FB2_PIN A2 // FB2     947 - 562   (Bosch)
+#define FB1_PIN A3 // FB1     157 - 940   (Bosch)
+#define HV_PIN A6 // volt-HV 100k & 2.2k
+#define ROTOR_PWM_PIN 6 // MainPWM for Rotor
+#define STATOR_PWM_PIN 9 // SecPWM for Stator
 
 int MainFB = 0;               // MainFB ( TPS1 )
-
 int SecFB = 0;                // SecFB ( TPS2 )
 float HiVoltage = 0;            // Hi  Voltage 0-220v
 int MainPWM = 0;              // MainPWM for Rotor
 int SecPWM = 0;               // SecPWM for Stator
 int tempValue = 0;            //  lm35 -temperature sensor
 float AMP = 0;                  //  A1302 hall senzor
+
+
 
 void setup() {
   pinMode(STATOR_PWM_PIN, OUTPUT);
@@ -65,11 +60,11 @@ void loop() {
   //MainFB = analogRead(FB1_PIN );
   //MainFB = constrain(MainFB, 154, 940);
   SecFB =  analogRead(FB2_PIN );
-  SecFB = constrain(SecFB, 300, 760);
+  SecFB = constrain(SecFB, 310, 760); 
   // map it to the range of the analog out:
   //mai intai te uiti ca iti vine MAINFB si SECFB ca limite si bagi limitele in map
   //MainPWM = map(MainFB, 154, 940, 0, 12); //limita laPWM 4.7%
-  SecPWM = map(SecFB, 300, 770, 0, 12);   //limita laPWM 4.7%
+  SecPWM = map(SecFB, 310, 770, 0, 12);   //limita laPWM 4.7%
   // change the analog out value:
   //analogWrite(ROTOR_PWM_PIN, MainPWM);
   analogWrite(STATOR_PWM_PIN, SecPWM);
