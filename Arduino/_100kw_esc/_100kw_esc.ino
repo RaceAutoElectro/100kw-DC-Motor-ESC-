@@ -70,9 +70,11 @@ void loop() {
   //MainPWM = map(MainFB, 154, 940, 0, 12); //limita laPWM 4.7%
   TargetAMP = map(MainFB, 310, 770, 2, MAX_AMP);   //limita la MAX_AMP
   MainPWM = (TargetAMP - AMP) * (255.0 / TargetAMP) * Kp;
+  if (MainPWM<0)
+    MainPWM=0;
   // change the analog out value:
   //analogWrite(ROTOR_PWM_PIN, MainPWM);
-  analogWrite(ROTOR_PWM_PIN, MainPWM)
+  analogWrite(ROTOR_PWM_PIN, MainPWM);
 #if SERIAL_ENABLED
   // print the results to the serial monitor:
   //  Serial.print("MainFB = ");
@@ -83,9 +85,9 @@ void loop() {
   Serial.print(TargetAMP);
   Serial.print("\t AMP = ");
   Serial.print(AMP);
-//  Serial.print("\t temp = ");
-//  Serial.print(tempValue);
-//  //  Serial.print("\t MainPwm = ");
+  //  Serial.print("\t temp = ");
+  //  Serial.print(tempValue);
+  //  Serial.print("\t MainPwm = ");
   //  Serial.print(MainPWM);
   //  Serial.print("\t SecPwm = ");
   //  Serial.print(SecPWM);
