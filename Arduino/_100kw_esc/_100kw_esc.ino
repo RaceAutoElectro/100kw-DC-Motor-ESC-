@@ -22,7 +22,7 @@ LiquidCrystal_I2C lcd(0x27, 16, 2, LCD_5x8DOTS);
 #define STATOR_PWM_PIN 6
 #define MAX_AMP 30
 #define TARGET_MULTIPLIER 13
-#define Kp 0.1
+#define Kp 0.5
 
 int MainFB = 0;               // MainFB ( TPS1 )
 int SecFB = 0;                // SecFB ( TPS2 )
@@ -42,7 +42,7 @@ void task_10mS () {
     //  Serial.print("MainFB = ");
     //  Serial.print(MainFB);
     //Serial.print("\t MainPWM = ");
-    Serial.print(MainPWM / 2);
+    Serial.print(MainPWM / 10);
     Serial.print("\t");
     Serial.print(TargetAMP / TARGET_MULTIPLIER);
     Serial.print("\t");
