@@ -72,7 +72,7 @@ void loop() {
   MainPWM = (TargetAMP - AMP) * (255 / TargetAMP) * Kp;
   // change the analog out value:
   //analogWrite(ROTOR_PWM_PIN, MainPWM);
-  analogWrite(ROTOR_PWM_PIN, MainPWM)
+  analogWrite(ROTOR_PWM_PIN, MainPWM);
 #if SERIAL_ENABLED
   // print the results to the serial monitor:
   //  Serial.print("MainFB = ");
