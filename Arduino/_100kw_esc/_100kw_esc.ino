@@ -72,20 +72,20 @@ void loop() {
   MainPWM = (TargetAMP - AMP) * (255 / TargetAMP) * Kp;
   // change the analog out value:
   //analogWrite(ROTOR_PWM_PIN, MainPWM);
-  analogWrite(ROTOR_PWM_PIN, MainPWM);
+  analogWrite(ROTOR_PWM_PIN, MainPWM)
 #if SERIAL_ENABLED
   // print the results to the serial monitor:
   //  Serial.print("MainFB = ");
   //  Serial.print(MainFB);
-  Serial.print("\t SecFB = ");
-  Serial.print(MainFB);
-  Serial.print("\t HiVoltage = ");
-  Serial.print(HiVoltage);
+  Serial.print("\t MainPWM = ");
+  Serial.print(MainPWM);
+  Serial.print("\t TargetAMP = ");
+  Serial.print(TargetAMP);
   Serial.print("\t AMP = ");
   Serial.print(AMP);
-  Serial.print("\t temp = ");
-  Serial.print(tempValue);
-  //  Serial.print("\t MainPwm = ");
+//  Serial.print("\t temp = ");
+//  Serial.print(tempValue);
+//  //  Serial.print("\t MainPwm = ");
   //  Serial.print(MainPWM);
   //  Serial.print("\t SecPwm = ");
   //  Serial.print(SecPWM);
