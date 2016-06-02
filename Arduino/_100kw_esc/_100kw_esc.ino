@@ -71,7 +71,7 @@ void loop() {
   TargetAMP = map(MainFB, 310, 770, 2, MAX_AMP);   //limita la MAX_AMP
   MainPWM = (TargetAMP - AMP) * (255.0 / TargetAMP) * Kp;
   if (MainPWM<0)
-    MainPWM=0;
+    MainPWM=255+MainPWM;
   // change the analog out value:
   //analogWrite(ROTOR_PWM_PIN, MainPWM);
   analogWrite(ROTOR_PWM_PIN, MainPWM);
