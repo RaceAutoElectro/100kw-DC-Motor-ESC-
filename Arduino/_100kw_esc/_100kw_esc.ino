@@ -21,7 +21,7 @@ LiquidCrystal_I2C lcd(0x27, 16, 2, LCD_5x8DOTS);
 #define ROTOR_PWM_PIN 9
 #define STATOR_PWM_PIN 6
 #define MAX_AMP 30
-#define TARGET_MULTIPLIER 4
+#define TARGET_MULTIPLIER 1
 #define Kp 0.1
 
 int MainFB = 0;               // MainFB ( TPS1 )
