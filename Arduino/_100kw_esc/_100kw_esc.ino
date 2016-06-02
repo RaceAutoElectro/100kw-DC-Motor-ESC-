@@ -112,7 +112,7 @@ void loop() {
   // map it to the range of the analog out:
   //mai intai te uiti ca iti vine MAINFB si SECFB ca limite si bagi limitele in map
   //MainPWM = map(MainFB, 154, 940, 0, 12); //limita laPWM 4.7%
-  TargetAMP = map(MainFB, 310, 770, 2, MAX_AMP);   //limita la MAX_AMP
+  TargetAMP = map(MainFB, 310, 770, 2, MAX_AMP*TARGET_MULTIPLIER);   //limita la MAX_AMP
   MainPWM = (TargetAMP - AMP) * Kp;
   MainPWM = constrain(MainPWM, 0, 255);
   // change the analog out value:
