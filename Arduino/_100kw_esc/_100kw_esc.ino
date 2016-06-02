@@ -72,6 +72,8 @@ void loop() {
   MainPWM = (TargetAMP - AMP) * (255.0 / TargetAMP) * Kp;
   if (MainPWM<0)
     MainPWM=255+MainPWM;
+    if (MainPWM<0)
+      MainPWM=0;
   // change the analog out value:
   //analogWrite(ROTOR_PWM_PIN, MainPWM);
   analogWrite(ROTOR_PWM_PIN, MainPWM);
@@ -108,5 +110,5 @@ void loop() {
   // wait 2 milliseconds before the next loop
   // for the analog-to-digital converter to settle
   // after the last reading:
-  delay(200);
+  //delay(200);
 }
