@@ -25,7 +25,7 @@ LiquidCrystal_I2C lcd(0x27, 16, 2, LCD_5x8DOTS);
 int MainFB = 0;               // MainFB ( TPS1 )
 int SecFB = 0;                // SecFB ( TPS2 )
 float HiVoltage = 0;            // Hi  Voltage 0-220v
-int MainPWM = 0;              // MainPWM for Rotor
+float MainPWM = 0;              // MainPWM for Rotor
 int SecPWM = 0;               // SecPWM for Stator
 int tempValue = 0;            //  lm35 -temperature sensor
 float AMP = 0, TargetAMP = 0;                  //  A1302 hall senzor
@@ -69,10 +69,10 @@ void loop() {
   //mai intai te uiti ca iti vine MAINFB si SECFB ca limite si bagi limitele in map
   //MainPWM = map(MainFB, 154, 940, 0, 12); //limita laPWM 4.7%
   TargetAMP = map(MainFB, 310, 770, 2, MAX_AMP);   //limita la MAX_AMP
-  MainPWM = (TargetAMP - AMP) * (255 / TargetAMP) * Kp;
+  MainPWM = (TargetAMP - AMP) * (255.0 / TargetAMP) * Kp;
   // change the analog out value:
   //analogWrite(ROTOR_PWM_PIN, MainPWM);
-  analogWrite(ROTOR_PWM_PIN, MainPWM);
+  analogWrite(ROTOR_PWM_PIN, MainPWM)
 #if SERIAL_ENABLED
   // print the results to the serial monitor:
   //  Serial.print("MainFB = ");
