@@ -21,8 +21,8 @@ LiquidCrystal_I2C lcd(0x27, 16, 2, LCD_5x8DOTS);
 #define ROTOR_PWM_PIN 9
 #define STATOR_PWM_PIN 6
 #define MAX_AMP 30
-#define TARGET_MULTIPLIER 5
-#define Kp 0.05
+#define TARGET_MULTIPLIER 13
+#define Kp 0.1
 
 int MainFB = 0;               // MainFB ( TPS1 )
 int SecFB = 0;                // SecFB ( TPS2 )
@@ -42,7 +42,7 @@ void task_10mS () {
     //  Serial.print("MainFB = ");
     //  Serial.print(MainFB);
     //Serial.print("\t MainPWM = ");
-    Serial.print(MainPWM / 10);
+    Serial.print(MainPWM / 2);
     Serial.print("\t");
     Serial.print(TargetAMP / TARGET_MULTIPLIER);
     Serial.print("\t");
@@ -101,8 +101,7 @@ void loop() {
     AMP += analogRead(CURRENT_PIN);
     HiVoltage += analogRead(HV_PIN);
   }
-  AMP = (AMP / 30 + 512) / 2 - baselineAMP;
-  if (AMP<0) AMP=0;
+  AMP = (AMP / 30 - 514.5) / 2 - baselineAmp;
   //HiVoltage = (5.0 * HiVoltage/30 * 4750.0) / 2048 ;
   HiVoltage = HiVoltage / 264.0;
   //MainFB = analogRead(FB1_PIN );
@@ -112,12 +111,9 @@ void loop() {
   // map it to the range of the analog out:
   //mai intai te uiti ca iti vine MAINFB si SECFB ca limite si bagi limitele in map
   //MainPWM = map(MainFB, 154, 940, 0, 12); //limita laPWM 4.7%
-  TargetAMP = map(MainFB, 310, 770, 0.01, MAX_AMP*TARGET_MULTIPLIER);   //limita la MAX_AMP
-  MainPWM = (TargetAMP - AMP) * (255.0 / TargetAMP) * Kp;
-  if (MainPWM<0)
-    MainPWM=255+MainPWM;
-    if (MainPWM<0)
-      MainPWM=0;
+  TargetAMP = map(MainFB, 310, 770, 2, MAX_AMP);   //limita la MAX_AMP
+  MainPWM = (TargetAMP - AMP) * Kp;
+  MainPWM = constrain(MainPWM, 0, 255);
   // change the analog out value:
   //analogWrite(ROTOR_PWM_PIN, MainPWM);
   analogWrite(ROTOR_PWM_PIN, MainPWM);
