@@ -102,6 +102,7 @@ void loop() {
     HiVoltage += analogRead(HV_PIN);
   }
   AMP = (AMP / 30 + 512) / 2 - baselineAMP;
+  if (AMP<0) AMP=0;
   //HiVoltage = (5.0 * HiVoltage/30 * 4750.0) / 2048 ;
   HiVoltage = HiVoltage / 264.0;
   //MainFB = analogRead(FB1_PIN );
