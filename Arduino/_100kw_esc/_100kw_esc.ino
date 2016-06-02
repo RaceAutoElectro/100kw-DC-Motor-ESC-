@@ -42,7 +42,7 @@ void task_10mS () {
     //  Serial.print("MainFB = ");
     //  Serial.print(MainFB);
     //Serial.print("\t MainPWM = ");
-    Serial.print(MainPWM / 2);
+    Serial.print(MainPWM / 10);
     Serial.print("\t");
     Serial.print(TargetAMP / TARGET_MULTIPLIER);
     Serial.print("\t");
