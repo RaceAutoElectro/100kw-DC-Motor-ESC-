@@ -22,7 +22,7 @@ LiquidCrystal_I2C lcd(0x27, 16, 2, LCD_5x8DOTS);
 #define STATOR_PWM_PIN 6
 #define MAX_AMP 30
 #define TARGET_MULTIPLIER 1
-#define Kp 0.1
+#define Kp 0.01
 
 int MainFB = 0;               // MainFB ( TPS1 )
 int SecFB = 0;                // SecFB ( TPS2 )
@@ -112,7 +112,7 @@ void loop() {
   // map it to the range of the analog out:
   //mai intai te uiti ca iti vine MAINFB si SECFB ca limite si bagi limitele in map
   //MainPWM = map(MainFB, 154, 940, 0, 12); //limita laPWM 4.7%
-  TargetAMP = map(MainFB, 310, 770, 0, MAX_AMP);   //limita la MAX_AMP
+  TargetAMP = map(MainFB, 310, 770, 0, MAX_AMP*TARGET_MULTIPLIER);   //limita la MAX_AMP
   MainPWM = (TargetAMP - AMP) * (255.0 / TargetAMP) * Kp;
   if (MainPWM<0)
     MainPWM=255+MainPWM;
