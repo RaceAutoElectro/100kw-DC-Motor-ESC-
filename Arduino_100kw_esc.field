@@ -33,8 +33,10 @@ float MainPWM = 0;              // MainPWM for Rotor
 int SecPWM = 0;               // SecPWM for Stator
 int tempValue = 0;                //  lm35 -temperature sensor
 float AMP = 0, TargetAMP = 0;                  //  A1302 hall senzor
+float AMPS = 0, TargetAMPS = 0;                  //  A1302 hall senzor Stator
 float power = 0;            //  Power (w,kw)
 int baselineAMP = 0;
+int baselineAMPS = 0;
 unsigned long milliseconds;
 void task_10mS () {
   unsigned long localTime = millis();
@@ -72,6 +74,9 @@ void task_10mS () {
     lcd.setCursor(9, 1);
     lcd.print(power);
     lcd.print("W");
+    lcd.setCursor(0, 2);
+    lcd.print(AMPS);
+    lcd.print("AS");
 #endif
     // wait 2 milliseconds before the next loop
     // for the analog-to-digital converter to settle
@@ -82,10 +87,11 @@ void task_10mS () {
 void setup() {
   pinMode(STATOR_PWM_PIN, OUTPUT);
   pinMode(ROTOR_PWM_PIN, OUTPUT);
-  digitalWrite(STATOR_PWM_PIN, 0); // statorrrrrr
+  digitalWrite(STATOR_PWM_PIN, 0); //Stator
   digitalWrite(ROTOR_PWM_PIN, 0);
   delay(100);
   baselineAMP = analogRead(CURRENT_PIN);
+  baselineAMPS = analogRead(CURRENT_S_PIN); //Stator
 #if SERIAL_ENABLED
   // initialize serial communications at 9600 bps:
   Serial.begin(115200);
@@ -102,15 +108,20 @@ void loop() {
   // read the analog in value:
   tempValue = (5.0 * analogRead(A1) * 100.0) / 1024;
   AMP = 0;
+  AMPS = 0;  //Stator
   HiVoltage = 0;
   for (char i = 0; i < 30; i++) {
     AMP += analogRead(CURRENT_PIN);
     HiVoltage += analogRead(HV_PIN);
+    AMPS += analogRead(CURRENT_S_PIN); //Stator
   }
   AMP = (AMP / 30 +512) / 2 - baselineAMP;
   if (AMP<0) AMP=0;
   //HiVoltage = (5.0 * HiVoltage/30 * 4750.0) / 2048 ;
   HiVoltage = HiVoltage / 264.0;
+
+ //  AMPS = (AMPS / 30 +512) / 2 - baselineAMPS;  //Stator
+ // if (AMPS<0) AMPS=0;
   
    power = (HiVoltage * AMP) ;
    
