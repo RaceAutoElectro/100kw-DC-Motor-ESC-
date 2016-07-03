@@ -18,8 +18,11 @@ LiquidCrystal_I2C lcd(0x27, 16, 2, LCD_5x8DOTS);
 #define ROTOR_PWM_PIN 9               // Rotor PWM 
 #define STATOR_PWM_PIN 6              // Stator PWM ( field armature )
 #define MAX_AMP 100                   // Max AMP - Rotor
+#define MAX_AMPS 10                   // Max AMP - Stator
 #define TARGET_MULTIPLIER 4           // Motor Parameters (Rotor)
 #define Kp 1                          // Motor Parameters (Rotor)
+#define TARGET_MULTIPLIER_S 4         // Motor Parameters (Stator)
+#define Kp_S 1                        // Motor Parameters (Stator)
 
 int MainFB = 0;                       // MainFB ( TPS1 )
 int SecFB = 0;                        // SecFB ( TPS2 )
@@ -93,9 +96,9 @@ void setup() {
   pinMode(STATOR_PWM_PIN, OUTPUT);
   pinMode(ROTOR_PWM_PIN, OUTPUT);
   digitalWrite(STATOR_PWM_PIN, 0); //Stator
-  digitalWrite(ROTOR_PWM_PIN, 0);
+  digitalWrite(ROTOR_PWM_PIN, 0);  //Rotor
   delay(100);
-  baselineAMP = analogRead(CURRENT_PIN);
+  baselineAMP = analogRead(CURRENT_PIN);    //Rotor
   baselineAMPS = analogRead(CURRENT_S_PIN); //Stator
 
 #if SERIAL_ENABLED
@@ -121,17 +124,17 @@ void loop() {
     AMP += analogRead(CURRENT_PIN);
     HiVoltage += analogRead(HV_PIN);
     AMPS += analogRead(CURRENT_S_PIN); //Stator
-    //AMPS += analogRead(CURRENT_S_PIN); //Stator
+  
   }
   AMP = (AMP / 30 +512) / 2 - baselineAMP;
-  if (AMP<0) AMP=0;
+  if (AMP<0.1) AMP=0;
   //HiVoltage = (5.0 * HiVoltage/30 * 4750.0) / 2048 ;
   HiVoltage = HiVoltage / 271.0;
 
   AMPS =( (AMPS / 30 +523) / 2 - baselineAMPS )* 2.1 ;  //Stator
- // if (AMPS<0) AMPS=0;
+ if (AMPS<0.1) AMPS=0;
   
-   power = (HiVoltage * AMP) ;
+   power = (HiVoltage * AMP)+(HiVoltage * AMPS) ;       // Power for Stator + Rotor 
    
   //MainFB = analogRead(FB1_PIN );
   //MainFB = constrain(MainFB, 154, 940);
@@ -140,10 +143,12 @@ void loop() {
   // map it to the range of the analog out:
   //mai intai te uiti ca iti vine MAINFB si SECFB ca limite si bagi limitele in map
   //MainPWM = map(MainFB, 154, 940, 0, 12); //limita laPWM 4.7%
-  TargetAMP = map(MainFB, 310, 770, 0, MAX_AMP*TARGET_MULTIPLIER);   //limita la MAX_AMP
-  MainPWM = (TargetAMP - AMP) * Kp;
+  TargetAMP = map(MainFB, 310, 770, 0, MAX_AMP*TARGET_MULTIPLIER);   //limita la MAX_AMP Rotor
+  //TargetAMPS = map(MainFB, 310, 770, 0, MAX_AMPS*TARGET_MULTIPLIER_S);   //limita la MAX_AMP Stator
+  MainPWM = (TargetAMP - AMP) * Kp; 
+  SecPWM = (TargetAMPS - AMPS) * Kp_S;                                  
   MainPWM = constrain(MainPWM, 0, 255);
-  SecPWM = constrain(SecPWM, 5, 255);
+  SecPWM = constrain(SecPWM, 5, 100);
   // change the analog out value:
   analogWrite(ROTOR_PWM_PIN, MainPWM);
   analogWrite(STATOR_PWM_PIN, SecPWM);
