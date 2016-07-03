@@ -1,3 +1,4 @@
+
 #define SERIAL_ENABLED 1
 #define LCD_ENABLED 1
 #include <Wire.h>
@@ -114,13 +115,14 @@ void loop() {
     AMP += analogRead(CURRENT_PIN);
     HiVoltage += analogRead(HV_PIN);
     AMPS += analogRead(CURRENT_S_PIN); //Stator
+    //AMPS += analogRead(CURRENT_S_PIN); //Stator
   }
   AMP = (AMP / 30 +512) / 2 - baselineAMP;
   if (AMP<0) AMP=0;
   //HiVoltage = (5.0 * HiVoltage/30 * 4750.0) / 2048 ;
-  HiVoltage = HiVoltage / 264.0;
+  HiVoltage = HiVoltage / 271.0;
 
- //  AMPS = (AMPS / 30 +512) / 2 - baselineAMPS;  //Stator
+  AMPS =( (AMPS / 30 +523) / 2 - baselineAMPS )* 2.1 ;  //Stator
  // if (AMPS<0) AMPS=0;
   
    power = (HiVoltage * AMP) ;
@@ -135,7 +137,7 @@ void loop() {
   TargetAMP = map(MainFB, 310, 770, 0, MAX_AMP*TARGET_MULTIPLIER);   //limita la MAX_AMP
   MainPWM = (TargetAMP - AMP) * Kp;
   MainPWM = constrain(MainPWM, 0, 255);
-  SecPWM = constrain(SecPWM, 15, 255);
+  SecPWM = constrain(SecPWM, 5, 255);
   // change the analog out value:
   analogWrite(ROTOR_PWM_PIN, MainPWM);
   analogWrite(STATOR_PWM_PIN, SecPWM);
