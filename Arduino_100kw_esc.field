@@ -15,6 +15,7 @@ LiquidCrystal_I2C lcd(0x27, 16, 2, LCD_5x8DOTS);
 #define FB1_PIN A2                    // FB1     157 - 940   (Bosch)
 #define HV_PIN A6                     // volt-HV 100k & 2.2k
 #define CURRENT_S_PIN A7              // A1302 hall senzor Stator
+#define MAINREL 7                     // MainRelay
 #define ROTOR_PWM_PIN 9               // Rotor PWM 
 #define STATOR_PWM_PIN 6              // Stator PWM ( field armature )
 #define MAX_AMP 100                   // Max AMP - Rotor
@@ -23,8 +24,7 @@ LiquidCrystal_I2C lcd(0x27, 16, 2, LCD_5x8DOTS);
 #define Kp 1                          // Motor Parameters (Rotor)
 #define TARGET_MULTIPLIER_S 4         // Motor Parameters (Stator)
 #define Kp_S 0.2                      // Motor Parameters (Stator)
-int STATUS = 0;                          // Error Status
-
+int STATUS = 0;                       // Error Status
 int MainFB = 0;                       // MainFB ( TPS1 )
 int SecFB = 0;                        // SecFB ( TPS2 )
 float HiVoltage = 0;                  // Hi  Voltage 0-220v
@@ -95,6 +95,7 @@ void task_10mS () {
 
 
 void setup() {
+  pinMode(MAINREL, OUTPUT);
   pinMode(STATOR_PWM_PIN, OUTPUT);
   pinMode(ROTOR_PWM_PIN, OUTPUT);
   digitalWrite(STATOR_PWM_PIN, 0); //Stator
@@ -126,18 +127,16 @@ void loop() {
   AMPS = 0;  //Stator
   HiVoltage = 0;
 
- 
-   
-  for (char i = 0; i < 30; i++) {
+ for (char i = 0; i < 30; i++) {
     AMP += analogRead(CURRENT_PIN);
     HiVoltage += analogRead(HV_PIN);
     AMPS += analogRead(CURRENT_S_PIN); //Stator
-  
   }
+ 
   AMP = (AMP / 30 +512) / 2 - baselineAMP;
   if (AMP<0.1) AMP=0;
-  //HiVoltage = (5.0 * HiVoltage/30 * 4750.0) / 2048 ;
-  HiVoltage = HiVoltage / 271.0;
+  
+  HiVoltage = HiVoltage / 271.0;  //HiVoltage = (5.0 * HiVoltage/30 * 4750.0) / 2048 ;
 
   AMPS =( (AMPS / 30 +523) / 2 - baselineAMPS )* 2.1 ;  //Stator
 // if (AMPS<0.1) AMPS=0;
@@ -146,7 +145,8 @@ void loop() {
    if (HiVoltage<16.2) STATUS=1;  // Battery protection + Detect if MOSFets are dead 
    if (AMPS<2) STATUS=2;  // Stator protection
    if (AMPS>5) STATUS=3;  // Stator protection
-   if (tempValue>100) STATUS=3;  // Stator protection
+   if (tempValue>100) STATUS=4;  // Stator protection
+   if (STATUS=0)  digitalWrite(MAINREL, HIGH);   // turn the LED on (HIGH is the voltage level)
    
    
   //MainFB = analogRead(FB1_PIN );
