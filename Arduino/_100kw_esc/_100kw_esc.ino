@@ -69,13 +69,13 @@ void task_10mS () {
     lcd.print(HiVoltage);
     lcd.print("V");
     lcd.setCursor(9, 0);
-    lcd.print(AMP);
+    lcd.print(rotorCurrent);
     lcd.print("A");
     lcd.setCursor(0, 1);
     lcd.print(temperature);
     lcd.print("C");
     lcd.setCursor(9, 1);
-    lcd.print(AMPS);
+    lcd.print(statorCurrent);
     lcd.print("AS");
     lcd.setCursor(0, 2);
     lcd.print(consumedPower);
@@ -136,9 +136,8 @@ void loop() {
   }
  
   rotorCurrent = (rotorCurrent / 30 +512) / 2 - baselineAMP;
-  
-  
-  HiVoltage = HiVoltage / 271;
+ 
+ 
 
   statorCurrent =( (statorCurrent / 30 +522) / 2 - baselineAMPS )* 2.1 ;  //Stator
 
