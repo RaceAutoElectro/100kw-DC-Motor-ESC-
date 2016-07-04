@@ -136,7 +136,7 @@ void loop() {
   }
  
   rotorCurrent = (rotorCurrent / 30 +512) / 2 - baselineAMP;
- 
+  HiVoltage = HiVoltage/31;
  
 
   statorCurrent =( (statorCurrent / 30 +522) / 2 - baselineAMPS )* 2.1 ;  //Stator
