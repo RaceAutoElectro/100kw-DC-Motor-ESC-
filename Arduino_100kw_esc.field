@@ -148,7 +148,8 @@ void loop() {
    if (AMPS<0) STATUS=2;  // Stator protection -  no power to stator
    if (AMPS>7) STATUS=3;  // Stator protection - over curent on stator
    if (tempValue>100) STATUS=4;  // Controller over tempereature   protection
-   if (STATUS==0)  digitalWrite(MAINREL, HIGH);  // turn the LED on (HIGH is the voltage level)
+   if (STATUS==0)  digitalWrite(MAINREL, HIGH);  // Activate MainRel 
+   if (STATUS!=0)  digitalWrite(MAINREL, LOW);  // Turn Off MainRel
    
    
   //MainFB = analogRead(FB1_PIN );
