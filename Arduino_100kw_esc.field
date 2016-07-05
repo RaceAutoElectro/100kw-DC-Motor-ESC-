@@ -1,5 +1,5 @@
 #define SERIAL_ENABLED 1
-#define LCD_ENABLED 1
+#define LCD_ENABLED 0
 #include <Wire.h>
 #if LCD_ENABLED
 #include <LiquidCrystal_I2C.h>
@@ -62,10 +62,10 @@ void task_10mS () {
     //  Serial.print(SecPWM);
     Serial.println( );
 #endif
-                                       
+
 #if LCD_ENABLED                       // Lcd
     lcd.clear();
-    lcd.setCursor(0, 0); 
+    lcd.setCursor(0, 0);
     lcd.print(HiVoltage);
     lcd.print("V");
     lcd.setCursor(9, 0);
@@ -80,10 +80,10 @@ void task_10mS () {
     lcd.setCursor(0, 2);
     lcd.print(power);
     lcd.print("W");
-     lcd.setCursor(9, 2);
+    lcd.setCursor(9, 2);
     lcd.print("Status:");
     lcd.print(STATUS);
-    
+
 
 #endif
     // wait 2 milliseconds before the next loop
@@ -102,7 +102,7 @@ void setup() {
   digitalWrite(ROTOR_PWM_PIN, 0);  //Rotor
   digitalWrite(MAINREL, 0); //Stator
   delay(100);
-  
+
   baselineAMP = analogRead(CURRENT_PIN);    //Rotor
   baselineAMPS = analogRead(CURRENT_S_PIN); //Stator
 
@@ -119,39 +119,41 @@ void setup() {
   // Turn on the blacklight and print a message.
   lcd.backlight();
 #endif
+  delay(5000);
+  if ((HiVoltage > 16.2) && (AMPS > 0) && (AMPS < 7) && (tempValue < 100))
+    digitalWrite(MAINREL, HIGH);  // Activate MainRel
 }
 
 void loop() {
-  
+
   // read the analog in value:
   tempValue = (5.0 * analogRead(A1) * 100.0) / 1024;
   AMP = 0;
   AMPS = 0;  //Stator
   HiVoltage = 0;
 
- for (char i = 0; i < 30; i++) {
+  for (char i = 0; i < 30; i++) {
     AMP += analogRead(CURRENT_PIN);
     HiVoltage += analogRead(HV_PIN);
     AMPS += analogRead(CURRENT_S_PIN); //Stator
   }
- 
-  AMP = (AMP / 30 +512) / 2 - baselineAMP;
-  if (AMP<0.1) AMP=0;
-  
+
+  AMP = (AMP / 30 + 512) / 2 - baselineAMP;
+  if (AMP < 0.1) AMP = 0;
+
   HiVoltage = HiVoltage / 271.0;  //HiVoltage = (5.0 * HiVoltage/30 * 4750.0) / 2048 ;
 
-  AMPS =( (AMPS / 30 +522) / 2 - baselineAMPS )* 2.1 ;  //Stator
-// if (AMPS<0.1) AMPS=0;
-  
-   power = (HiVoltage * AMP)+(HiVoltage * AMPS) ;       // Power for Stator + Rotor 
-   if (HiVoltage<16.2) STATUS=1;  // Battery protection + Detect if MOSFets are dead 
-   if (AMPS<0) STATUS=2;  // Stator protection -  no power to stator
-   if (AMPS>7) STATUS=3;  // Stator protection - over curent on stator
-   if (tempValue>100) STATUS=4;  // Controller over tempereature   protection
-   if (STATUS==0)  digitalWrite(MAINREL, HIGH);  // Activate MainRel 
-   if (STATUS!=0)  digitalWrite(MAINREL, LOW);  // Turn Off MainRel
-   
-   
+  AMPS = ( (AMPS / 30 + 522) / 2 - baselineAMPS ) * 2.1 ; //Stator
+  // if (AMPS<0.1) AMPS=0;
+
+  power = (HiVoltage * AMP) + (HiVoltage * AMPS) ;     // Power for Stator + Rotor
+  if (HiVoltage < 16.2) STATUS = 1; // Battery protection + Detect if MOSFets are dead
+  if (AMPS < 0) STATUS = 2; // Stator protection -  no power to stator
+  if (AMPS > 7) STATUS = 3; // Stator protection - over curent on stator
+  if (tempValue > 100) STATUS = 4; // Controller over tempereature   protection
+  if (STATUS != 0)  digitalWrite(MAINREL, LOW); // Turn Off MainRel
+
+
   //MainFB = analogRead(FB1_PIN );
   //MainFB = constrain(MainFB, 154, 940);
   MainFB =  analogRead(FB1_PIN );
@@ -159,11 +161,11 @@ void loop() {
   // map it to the range of the analog out:
   //mai intai te uiti ca iti vine MAINFB si SECFB ca limite si bagi limitele in map
   //MainPWM = map(MainFB, 154, 940, 0, 12); //limita laPWM 4.7%
-  TargetAMP = map(MainFB, 310, 770, 0, MAX_AMP*TARGET_MULTIPLIER);   //limita la MAX_AMP Rotor
+  TargetAMP = map(MainFB, 310, 770, 0, MAX_AMP * TARGET_MULTIPLIER); //limita la MAX_AMP Rotor
   //TargetAMPS = map(MainFB, 310, 770, 0, MAX_AMPS*TARGET_MULTIPLIER_S);   //limita la MAX_AMP Stator
-  TargetAMPS = MAX_AMPS*TARGET_MULTIPLIER_S ;
-  MainPWM = (TargetAMP - AMP) * Kp; 
-  SecPWM = (TargetAMPS - AMPS) * Kp_S;                                  
+  TargetAMPS = MAX_AMPS * TARGET_MULTIPLIER_S ;
+  MainPWM = (TargetAMP - AMP) * Kp;
+  SecPWM = (TargetAMPS - AMPS) * Kp_S;
   MainPWM = constrain(MainPWM, 0, 255);
   SecPWM = constrain(SecPWM, 0, 50);
   // change the analog out value:
