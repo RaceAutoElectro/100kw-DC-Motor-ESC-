@@ -18,13 +18,17 @@ LiquidCrystal_I2C lcd(0x27, 16, 2, LCD_5x8DOTS);
 #define MAINREL 8                     // MainRelay
 #define ROTOR_PWM_PIN 9               // Rotor PWM 
 #define STATOR_PWM_PIN 6              // Stator PWM ( field armature )
+
+#define MIN_STATOR_CURRENT 2
 #define MAX_ROTOR_CURRENT 100                   // Max AMP - Rotor
-#define MAX_STATOR_CURRENT 10                   // Max AMP - Stator
+#define MAX_STATOR_CURRENT 5                   // Max AMP - Stator
+#define ROTOR_OVERCURRENT 500
+#define STATOR_OVERCURRENT 10
 //#define TARGET_MULTIPLIER 4           // Motor Parameters (Rotor)
 #define Kp 1                          // Motor Parameters (Rotor)
 //#define TARGET_MULTIPLIER_S 4         // Motor Parameters (Stator)
 #define Kp_S 0.2                      // Motor Parameters (Stator)
-#define BATTERIES_DISCHARGED 12000
+#define BATTERIES_DISCHARGED 14000
 #define POWERSTAGE_DOWN 8000
 byte STATUS = 0;                       // Error Status
 unsigned short int MainFB = 0;                       // MainFB ( TPS1 )
@@ -120,7 +124,8 @@ void setup() {
   lcd.backlight();
 #endif
   delay(5000);
-  digitalWrite(MAINREL, HIGH);
+  if ((statorCurrent < ROTOR_OVERCURRENT) && (rotorCurrent < MAX_ROTOR_CURRENT) && (HiVoltage > BATTERIES_DISCHARGED))
+    digitalWrite(MAINREL, HIGH);
 }
 
 void loop() {
@@ -156,14 +161,21 @@ void loop() {
     lcd.print("Powerstage Down");
 #endif
   }
-  if (rotorCurrent > MAX_ROTOR_CURRENT) {
+  if (rotorCurrent > ROTOR_OVERCURRENT) {
     digitalWrite(MAINREL, LOW);
 #if LCD_ENABLED
     lcd.setCursor(0, 4);
     lcd.print("Rotor short, overcurrent");
 #endif
   }
-  if (statorCurrent > MAX_STATOR_CURRENT) {
+  if (statorCurrent > STATOR_OVERCURRENT) {
+    digitalWrite(MAINREL, LOW);
+#if LCD_ENABLED
+    lcd.setCursor(0, 4);
+    lcd.print("Stator short, overcurrent");
+#endif
+  }
+  if (statorCurrent < MIN_STATOR_CURRENT) {
     digitalWrite(MAINREL, LOW);
 #if LCD_ENABLED
     lcd.setCursor(0, 4);
@@ -171,13 +183,6 @@ void loop() {
 #endif
   }
 
-
-  // Battery protection + Detect if MOSFets are dead
-  //   if (AMPS<0) STATUS=2;  // Stator protection -  no power to stator
-  //   if (AMPS>7) STATUS=3;  // Stator protection - over curent on stator
-  //   if (temperature>100) STATUS=4;  // Controller over tempereature   protection
-  //   if (STATUS==0)  digitalWrite(MAINREL, HIGH);  // Activate MainRel
-  //   if (STATUS!=0)  digitalWrite(MAINREL, LOW);  // Turn Off MainRel
 
 
   //MainFB = analogRead(FB1_PIN );
