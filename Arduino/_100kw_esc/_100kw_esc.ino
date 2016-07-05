@@ -20,11 +20,12 @@ LiquidCrystal_I2C lcd(0x27, 16, 2, LCD_5x8DOTS);
 #define STATOR_PWM_PIN 6              // Stator PWM ( field armature )
 #define MAX_ROTOR_CURRENT 100                   // Max AMP - Rotor
 #define MAX_STATOR_CURRENT 10                   // Max AMP - Stator
-#define TARGET_MULTIPLIER 4           // Motor Parameters (Rotor)
+//#define TARGET_MULTIPLIER 4           // Motor Parameters (Rotor)
 #define Kp 1                          // Motor Parameters (Rotor)
-#define TARGET_MULTIPLIER_S 4         // Motor Parameters (Stator)
+//#define TARGET_MULTIPLIER_S 4         // Motor Parameters (Stator)
 #define Kp_S 0.2                      // Motor Parameters (Stator)
-#define LOW_VOLTAGE 1620
+#define BATTERIES_DISCHARGED 12000
+#define POWERSTAGE_DOWN 8000
 byte STATUS = 0;                       // Error Status
 unsigned short int MainFB = 0;                       // MainFB ( TPS1 )
 unsigned short int SecFB = 0;                        // SecFB ( TPS2 )
@@ -36,7 +37,7 @@ unsigned int rotorCurrent = 0, rotorTargetCurrent = 0;         //  A1302 hall se
 unsigned int statorCurrent = 0, statorTargetCurrent = 0;       //  A1302 hall senzor stator
 unsigned int consumedPower = 0;                //
 unsigned int baselineRotorCurrent = 0;                  // Initial AMP read  (Rotor)
-unsigned int baselineRotorCurrentS = 0;                 // Initial AMPs read  (Stator)
+unsigned int baselineStatorCurrent = 0;                 // Initial AMPs read  (Stator)
 
 
 unsigned long milliseconds;           // Delay with milis + task_10ms
@@ -52,7 +53,7 @@ void task_10mS () {
     //Serial.print("\t rotorPWM = ");
     Serial.print(rotorPWM / 10);
     Serial.print("\t");
-    Serial.print(rotorTargetCurrent / TARGET_MULTIPLIER);
+    Serial.print(rotorTargetCurrent);
     Serial.print("\t");
     Serial.print(rotorCurrent);
     //  Serial.print("\t temp = ");
@@ -84,8 +85,6 @@ void task_10mS () {
     lcd.setCursor(9, 2);
     lcd.print("Status:");
     lcd.print(STATUS);
-
-
 #endif
     // wait 2 milliseconds before the next loop
     // for the analog-to-digital converter to settle
@@ -105,7 +104,7 @@ void setup() {
   delay(100);
 
   baselineRotorCurrent = analogRead(CURRENT_PIN);    //Rotor
-  baselineRotorCurrentS = analogRead(CURRENT_S_PIN); //Stator
+  baselineStatorCurrent = analogRead(CURRENT_S_PIN); //Stator
 
   delay(200);
 
@@ -120,6 +119,8 @@ void setup() {
   // Turn on the blacklight and print a message.
   lcd.backlight();
 #endif
+  delay(5000);
+  digitalWrite(MAINREL, HIGH);
 }
 
 void loop() {
@@ -137,35 +138,60 @@ void loop() {
   }
 
   rotorCurrent = (rotorCurrent / 30 + 512) / 2 - baselineRotorCurrent;
-  statorCurrent = ( (statorCurrent / 30 + 522) / 2 - baselineRotorCurrentS ) * 2.1 ; //Stator
+  statorCurrent = ( (statorCurrent / 30 + 522) / 2 - baselineStatorCurrent) * 2.1 ; //Stator
   HiVoltage = HiVoltage / 31;
   consumedPower = (HiVoltage * (rotorCurrent + statorCurrent)) / 100;     // Power for Stator + Rotor
 
-  if ((HiVoltage > LOW_VOLTAGE) && (temperature < 100) && ()) 
-    
-  
+  if (HiVoltage < BATTERIES_DISCHARGED) {
+    digitalWrite(MAINREL, LOW);
+#if LCD_ENABLED
+    lcd.setCursor(0, 4);
+    lcd.print("Batteries discharged");
+#endif
+  }
+  if (HiVoltage < POWERSTAGE_DOWN) {
+    digitalWrite(MAINREL, LOW);
+#if LCD_ENABLED
+    lcd.setCursor(0, 4);
+    lcd.print("Powerstage Down");
+#endif
+  }
+  if (rotorCurrent > MAX_ROTOR_CURRENT) {
+    digitalWrite(MAINREL, LOW);
+#if LCD_ENABLED
+    lcd.setCursor(0, 4);
+    lcd.print("Rotor short, overcurrent");
+#endif
+  }
+  if (statorCurrent > MAX_STATOR_CURRENT) {
+    digitalWrite(MAINREL, LOW);
+#if LCD_ENABLED
+    lcd.setCursor(0, 4);
+    lcd.print("Stator short, overcurrent");
+#endif
+  }
+
+
   // Battery protection + Detect if MOSFets are dead
-    //   if (AMPS<0) STATUS=2;  // Stator protection -  no power to stator
-    //   if (AMPS>7) STATUS=3;  // Stator protection - over curent on stator
-    //   if (temperature>100) STATUS=4;  // Controller over tempereature   protection
-    //   if (STATUS==0)  digitalWrite(MAINREL, HIGH);  // Activate MainRel
-    //   if (STATUS!=0)  digitalWrite(MAINREL, LOW);  // Turn Off MainRel
+  //   if (AMPS<0) STATUS=2;  // Stator protection -  no power to stator
+  //   if (AMPS>7) STATUS=3;  // Stator protection - over curent on stator
+  //   if (temperature>100) STATUS=4;  // Controller over tempereature   protection
+  //   if (STATUS==0)  digitalWrite(MAINREL, HIGH);  // Activate MainRel
+  //   if (STATUS!=0)  digitalWrite(MAINREL, LOW);  // Turn Off MainRel
 
 
-    //MainFB = analogRead(FB1_PIN );
-    //MainFB = constrain(MainFB, 154, 940);
-    MainFB =  analogRead(FB1_PIN );
+  //MainFB = analogRead(FB1_PIN );
+  //MainFB = constrain(MainFB, 154, 940);
+  MainFB =  analogRead(FB1_PIN );
   MainFB = constrain(MainFB, 310, 760);
   // map it to the range of the analog out:
   //mai intai te uiti ca iti vine MAINFB si SECFB ca limite si bagi limitele in map
   //rotorPWM = map(MainFB, 154, 940, 0, 12); //limita laPWM 4.7%
-  rotorTargetCurrent = map(MainFB, 310, 770, 0, MAX_ROTOR_CURRENT * TARGET_MULTIPLIER); //limita la MAX_ROTOR_CURRENT Rotor
+  rotorTargetCurrent = map(MainFB, 310, 770, 0, MAX_ROTOR_CURRENT); //limita la MAX_ROTOR_CURRENT Rotor
   //TargetAMPS = map(MainFB, 310, 770, 0, MAX_STATOR_CURRENT*TARGET_MULTIPLIER_S);   //limita la MAX_ROTOR_CURRENT Stator
-  statorTargetCurrent = MAX_STATOR_CURRENT * TARGET_MULTIPLIER_S ;
-  rotorPWM = (statorTargetCurrent - rotorCurrent) * Kp;
+  statorTargetCurrent = MAX_STATOR_CURRENT;
+  rotorPWM = (rotorTargetCurrent - rotorCurrent) * Kp;
   statorPWM = (statorTargetCurrent - statorCurrent) * Kp_S;
-  rotorPWM = constrain(rotorPWM, 0, 255);
-  statorPWM = constrain(statorPWM, 0, 50);
   // change the analog out value:
   analogWrite(ROTOR_PWM_PIN, rotorPWM);
   analogWrite(STATOR_PWM_PIN, statorPWM);
