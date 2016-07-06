@@ -4,7 +4,7 @@
 #if LCD_ENABLED
 #include <LiquidCrystal_I2C.h>
 // Set the LCD address to 0x27 for a 16 chars and 2 line display
-LiquidCrystal_I2C lcd(0x27, 16, 2, LCD_5x8DOTS);
+LiquidCrystal_I2C lcd(0x27, 20, 4, LCD_5x8DOTS);
 #endif
 // These defines won't change.  They're used to give names to the pins used:
 
@@ -24,7 +24,10 @@ LiquidCrystal_I2C lcd(0x27, 16, 2, LCD_5x8DOTS);
 #define Kp 1                          // Motor Parameters (Rotor)
 #define TARGET_MULTIPLIER_S 4         // Motor Parameters (Stator)
 #define Kp_S 0.2                      // Motor Parameters (Stator)
+int MainFB_min = 310;                 // Throttle Minim FB1_PIN
+int MainFB_max = 760;                 // Throttle Maxim FB1_PIN
 int STATUS = 0;                       // Error Status
+int STATUS_S = 0;                     // Error Status Stator (Field)
 int MainFB = 0;                       // MainFB ( TPS1 )
 int SecFB = 0;                        // SecFB ( TPS2 )
 float HiVoltage = 0;                  // Hi  Voltage 0-220v
@@ -62,10 +65,10 @@ void task_10mS () {
     //  Serial.print(SecPWM);
     Serial.println( );
 #endif
-                                       
+
 #if LCD_ENABLED                       // Lcd
     lcd.clear();
-    lcd.setCursor(0, 0); 
+    lcd.setCursor(0, 0);
     lcd.print(HiVoltage);
     lcd.print("V");
     lcd.setCursor(9, 0);
@@ -80,10 +83,15 @@ void task_10mS () {
     lcd.setCursor(0, 2);
     lcd.print(power);
     lcd.print("W");
-     lcd.setCursor(9, 2);
+    lcd.setCursor(9, 2);
     lcd.print("Status:");
     lcd.print(STATUS);
-    
+   lcd.setCursor(9, 3);
+    lcd.print("Stat_S:");
+    lcd.print(STATUS_S);
+    lcd.setCursor(0, 3);
+    lcd.print("FB:");
+    lcd.print(MainFB);
 
 #endif
     // wait 2 milliseconds before the next loop
@@ -101,10 +109,11 @@ void setup() {
   digitalWrite(STATOR_PWM_PIN, 0); //Stator
   digitalWrite(ROTOR_PWM_PIN, 0);  //Rotor
   digitalWrite(MAINREL, 0); //Stator
-  delay(100);
+  delay(1000);
   
   baselineAMP = analogRead(CURRENT_PIN);    //Rotor
   baselineAMPS = analogRead(CURRENT_S_PIN); //Stator
+
 
   delay(200);
 
@@ -118,56 +127,66 @@ void setup() {
   lcd.begin();
   // Turn on the blacklight and print a message.
   lcd.backlight();
+  lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Startup check ! ");
 #endif
+  delay(5000);
+  
+ if (analogRead(FB1_PIN ) > MainFB_min) STATUS = 3; // Pedal Lockout ...... if not min DO NOT ACTIVATE MainRel
 }
 
 void loop() {
-  
+
   // read the analog in value:
   tempValue = (5.0 * analogRead(A1) * 100.0) / 1024;
   AMP = 0;
   AMPS = 0;  //Stator
   HiVoltage = 0;
 
- for (char i = 0; i < 30; i++) {
+  for (char i = 0; i < 30; i++) {
     AMP += analogRead(CURRENT_PIN);
     HiVoltage += analogRead(HV_PIN);
     AMPS += analogRead(CURRENT_S_PIN); //Stator
   }
- 
-  AMP = (AMP / 30 +512) / 2 - baselineAMP;
-  if (AMP<0.1) AMP=0;
-  
+
+  AMP = (AMP / 30 + 512) / 2 - baselineAMP;
+  if (AMP < 0.1) AMP = 0;
+
   HiVoltage = HiVoltage / 271.0;  //HiVoltage = (5.0 * HiVoltage/30 * 4750.0) / 2048 ;
 
-  AMPS =( (AMPS / 30 +522) / 2 - baselineAMPS )* 2.1 ;  //Stator
-// if (AMPS<0.1) AMPS=0;
+  AMPS = ( (AMPS / 30 + 523) / 2 - baselineAMPS ) * 2.1 ; //Stator
+  // if (AMPS<0.1) AMPS=0;
   
-   power = (HiVoltage * AMP)+(HiVoltage * AMPS) ;       // Power for Stator + Rotor 
-   if (HiVoltage<16.2) STATUS=1;  // Battery protection + Detect if MOSFets are dead 
-   if (AMPS<0) STATUS=2;  // Stator protection -  no power to stator
-   if (AMPS>7) STATUS=3;  // Stator protection - over curent on stator
-   if (tempValue>100) STATUS=4;  // Controller over tempereature   protection
-   if (STATUS==0)  digitalWrite(MAINREL, HIGH);  // Activate MainRel 
-   if (STATUS!=0)  digitalWrite(MAINREL, LOW);  // Turn Off MainRel
-   
-   
+  power = (HiVoltage * AMP) + (HiVoltage * AMPS) ;     // Power for Stator + Rotor
+  if (HiVoltage < 16.2) STATUS = 1; // Battery protection + Detect if MOSFets are dead
+ // if (tempValue > 100) STATUS = 2; // Controller over tempereature   protection
+  if (STATUS != 0)  digitalWrite(MAINREL, LOW); // Turn Off MainRel
+  if (STATUS == 0)  digitalWrite(MAINREL, HIGH); // Turn Off MainRel
+
+  if (AMP < 0.3) STATUS_S = 1; // Stator protection -  no power to stator
+  if (AMP > 0.5) STATUS_S = 0; // Stator protection -  no power to stator
+  if (AMP > 7) STATUS_S = 2; // Stator protection - over curent on stator
+
   //MainFB = analogRead(FB1_PIN );
   //MainFB = constrain(MainFB, 154, 940);
   MainFB =  analogRead(FB1_PIN );
-  MainFB = constrain(MainFB, 310, 760);
+  MainFB = constrain(MainFB, MainFB_min , MainFB_max);   //310 760
   // map it to the range of the analog out:
   //mai intai te uiti ca iti vine MAINFB si SECFB ca limite si bagi limitele in map
   //MainPWM = map(MainFB, 154, 940, 0, 12); //limita laPWM 4.7%
-  TargetAMP = map(MainFB, 310, 770, 0, MAX_AMP*TARGET_MULTIPLIER);   //limita la MAX_AMP Rotor
+  
+  TargetAMP = map(MainFB, MainFB_min, MainFB_max , 0, MAX_AMP * TARGET_MULTIPLIER); //limita la MAX_AMP Rotor
   //TargetAMPS = map(MainFB, 310, 770, 0, MAX_AMPS*TARGET_MULTIPLIER_S);   //limita la MAX_AMP Stator
-  TargetAMPS = MAX_AMPS*TARGET_MULTIPLIER_S ;
-  MainPWM = (TargetAMP - AMP) * Kp; 
-  SecPWM = (TargetAMPS - AMPS) * Kp_S;                                  
-  MainPWM = constrain(MainPWM, 0, 255);
-  SecPWM = constrain(SecPWM, 0, 50);
-  // change the analog out value:
-  analogWrite(ROTOR_PWM_PIN, MainPWM);
+  TargetAMPS = MAX_AMPS * TARGET_MULTIPLIER_S ;
+  MainPWM = (TargetAMP - AMP) * Kp;
+  SecPWM = (TargetAMPS - AMPS) * Kp_S;
+  MainPWM = constrain(MainPWM, 0, 255);// Min-Max PWM Stator
+  SecPWM = constrain(SecPWM, 0, 50);   // Min-Max PWM Rotor 
+  
+  if (STATUS_S == 0)  analogWrite(ROTOR_PWM_PIN, MainPWM); // Stator is powered ..... MainPWM ON
+  if (STATUS_S != 0)  analogWrite(ROTOR_PWM_PIN, 0); // Stator not powered ..... MainPWM OFF see ERROR
+  
   analogWrite(STATOR_PWM_PIN, SecPWM);
   task_10mS();
 }
